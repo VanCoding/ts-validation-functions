@@ -1,7 +1,7 @@
 {
   "name": "ts-validation-functions",
   "version": "1.0.0",
-  "description": "",
+  "description": "A small validation library primarily targeted at form validation",
   "main": "lib",
   "scripts": {
     "test": "jest",
