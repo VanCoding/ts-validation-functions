@@ -1,11 +1,11 @@
 import { mergeValidators, PropertyValue, Validate, ValidationError } from "..";
 
-function validateString(
+function validateString<T>(
   required: boolean,
   ...validators: Validate<string>[]
-): Validate<any> {
+): Validate<T> {
   const validator = mergeValidators(...validators);
-  return (value: PropertyValue<any>): ValidationError[] => {
+  return (value: PropertyValue<T>): ValidationError[] => {
     if (typeof value.value !== "string") {
       if (required) {
         return [{ description: "must be a string" }];
@@ -13,17 +13,17 @@ function validateString(
         return [];
       }
     } else {
-      return validator(value as PropertyValue<string>);
+      return validator(value as any as PropertyValue<string>);
     }
   };
 }
 
-export function isString(...validators: Validate<string>[]) {
-  return validateString(true, ...validators);
+export function isString<T>(...validators: Validate<string>[]) {
+  return validateString<T>(true, ...validators);
 }
 
-export function ifString(...validators: Validate<string>[]) {
-  return validateString(false, ...validators);
+export function ifString<T>(...validators: Validate<string>[]) {
+  return validateString<T>(false, ...validators);
 }
 
 export function minLength(length: number) {

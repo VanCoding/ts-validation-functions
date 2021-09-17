@@ -10,16 +10,20 @@ const {
   isNumber,
   min,
   max,
+  isArray,
+  ifObject,
+  ifString,
 } = Validators;
 describe("example", () => {
   it("works", () => {
     type Person = {
       name?: string;
       age?: number;
-      cars: Array<{
+      cars?: Array<{
         name: string;
         seats: number;
-      }>;
+      }> | null;
+      metadata?: string | { text: string };
     };
 
     const errors = validate<Person>(
@@ -28,14 +32,22 @@ describe("example", () => {
           { name: "Ferrari", seats: 2 },
           { name: "Bus", seats: 10 },
         ],
+        metadata: { text: "hello" },
       },
-      hasProperty("name", isString(minLength(10))),
+      hasProperty("name", isString()),
       ifProperty("age", isNumber(min(10))),
       hasProperty(
         "cars",
-        each(hasProperty("name", minLength(4), maxLength(5))),
-        hasIndex(2),
-        hasIndex(1, hasProperty("seats", min(4), max(6)))
+        isArray<Person["cars"]>(
+          each(hasProperty("name", minLength(4), maxLength(5))),
+          hasIndex(2),
+          hasIndex(1, hasProperty("seats", min(4), max(6)))
+        )
+      ),
+      ifProperty(
+        "metadata",
+        ifString(maxLength(100)),
+        ifObject<Person["metadata"]>(hasProperty("text", minLength(10)))
       )
     );
 
@@ -59,6 +71,10 @@ describe("example", () => {
       {
         description: "must be lower",
         path: "cars.1.seats",
+      },
+      {
+        description: "must be longer",
+        path: "metadata.text",
       },
     ]);
   });

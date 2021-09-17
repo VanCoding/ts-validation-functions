@@ -1,11 +1,11 @@
 import { mergeValidators, PropertyValue, Validate, ValidationError } from "..";
 
-function validateNumber(
+function validateNumber<T>(
   required: boolean,
   ...validators: Validate<number>[]
-): Validate<any> {
+) {
   const validator = mergeValidators(...validators);
-  return (value: PropertyValue<any>): ValidationError[] => {
+  return (value: PropertyValue<T>): ValidationError[] => {
     if (typeof value.value !== "number") {
       if (required) {
         return [{ description: "must be a number" }];
@@ -13,16 +13,16 @@ function validateNumber(
         return [];
       }
     } else {
-      return validator(value as PropertyValue<number>);
+      return validator(value as any as PropertyValue<number>);
     }
   };
 }
 
-export function ifNumber(...validators: Validate<number>[]) {
+export function ifNumber<T>(...validators: Validate<number>[]) {
   return validateNumber(false, ...validators);
 }
 
-export function isNumber(...validators: Validate<number>[]) {
+export function isNumber<T>(...validators: Validate<number>[]) {
   return validateNumber(true, ...validators);
 }
 

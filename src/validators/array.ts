@@ -1,8 +1,13 @@
 import { mergeValidators, PropertyValue, Validate, ValidationError } from "..";
 
-function validateArray<T>(required: boolean, ...validators: Validate<T[]>[]) {
+type ArrayOnly<T> = Extract<T, any[]>;
+
+function validateArray<T, R extends ArrayOnly<T>>(
+  required: boolean,
+  ...validators: Validate<ArrayOnly<T>>[]
+): Validate<T> {
   const subValidator = mergeValidators(...validators);
-  return (value: PropertyValue<T[]>): ValidationError[] => {
+  return (value: PropertyValue<T>): ValidationError[] => {
     if (!(value.value instanceof Array)) {
       if (required) {
         return [{ description: "must be an array" }];
@@ -10,22 +15,26 @@ function validateArray<T>(required: boolean, ...validators: Validate<T[]>[]) {
         return [];
       }
     } else {
-      return subValidator(value as PropertyValue<T[]>);
+      return subValidator(value as PropertyValue<R>);
     }
   };
 }
 
-export function ifArray<T>(...validators: Validate<T[]>[]) {
+export function ifArray<T>(
+  ...validators: Validate<ArrayOnly<T>>[]
+): Validate<T> {
   return validateArray(false, ...validators);
 }
 
-export function isArray<T>(...validators: Validate<T[]>[]) {
+export function isArray<T>(
+  ...validators: Validate<ArrayOnly<T>>[]
+): Validate<T> {
   return validateArray(true, ...validators);
 }
 
-export function each<T extends any[]>(...validators: Validate<T[number]>[]) {
+export function each<T>(...validators: Validate<T>[]): Validate<T[]> {
   const subvalidator = mergeValidators(...validators);
-  return (value: PropertyValue<T>): ValidationError[] => {
+  return (value: PropertyValue<T[]>): ValidationError[] => {
     return value.value
       .map((item, index) =>
         subvalidator({
@@ -40,13 +49,13 @@ export function each<T extends any[]>(...validators: Validate<T[number]>[]) {
   };
 }
 
-function validateIndex<T extends any[]>(
+function validateIndex<T>(
   index: number,
   required: boolean,
-  ...validators: Validate<T[number]>[]
-) {
+  ...validators: Validate<T>[]
+): Validate<T[]> {
   const subvalidator = mergeValidators(...validators);
-  return (value: PropertyValue<T>): ValidationError[] => {
+  return (value: PropertyValue<T[]>): ValidationError[] => {
     if (index >= value.value.length) {
       if (required) {
         return [{ description: "index does not exist", path: index + "" }];
@@ -64,16 +73,16 @@ function validateIndex<T extends any[]>(
   };
 }
 
-export function ifIndex<T extends any[]>(
+export function ifIndex<T>(
   index: number,
-  ...validators: Validate<T[number]>[]
-) {
+  ...validators: Validate<T>[]
+): Validate<T[]> {
   return validateIndex(index, false, ...validators);
 }
 
-export function hasIndex<T extends any[]>(
+export function hasIndex<T>(
   index: number,
-  ...validators: Validate<T[number]>[]
-) {
+  ...validators: Validate<T>[]
+): Validate<T[]> {
   return validateIndex(index, true, ...validators);
 }
