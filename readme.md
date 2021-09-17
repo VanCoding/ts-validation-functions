@@ -12,6 +12,10 @@ A small validation library primarily targeted at form validation
 ## example
 
 ```ts
+import { mergeValidators, validate, Validators } from "ts-validation-functions";
+const { hasProperty, minLength, maxLength, min, max, ifProperty, each } =
+  Validators;
+
 type Person = {
   firstname: string;
   lastname: string;
@@ -39,19 +43,22 @@ const isPerson = mergeValidators<Person>(
   hasProperty("cars", each(isCar))
 );
 
-const errors = validate({
-  firstname: "John",
-  lastname: "Doe",
-  salutation: "Mr",
-  age: 10,
-  cars: [
-    {
-      name: "Ferrari",
-    },
-    {
-      name: "Ford",
-      horsepower: 100,
-    },
-  ],
-});
+const errors = validate(
+  {
+    firstname: "John",
+    lastname: "Doe",
+    salutation: "Mr",
+    age: 10,
+    cars: [
+      {
+        name: "Ferrari",
+      },
+      {
+        name: "Ford",
+        horsepower: 100,
+      },
+    ],
+  },
+  isPerson
+);
 ```
