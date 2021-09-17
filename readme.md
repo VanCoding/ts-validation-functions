@@ -62,3 +62,7 @@ const errors = validate(
   isPerson
 );
 ```
+
+## license
+
+MIT
