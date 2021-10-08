@@ -1,42 +1,22 @@
-import { mergeValidators, PropertyValue, Validate, ValidationError } from "..";
+import { ifIs, is } from ".";
+import { Validate } from "..";
 
-function validateString<T>(
-  required: boolean,
-  ...validators: Validate<string>[]
-): Validate<T> {
-  const validator = mergeValidators(...validators);
-  return (value: PropertyValue<T>): ValidationError[] => {
-    if (typeof value.value !== "string") {
-      if (required) {
-        return [{ description: "must be a string" }];
-      } else {
-        return [];
-      }
-    } else {
-      return validator(value as any as PropertyValue<string>);
-    }
-  };
+function _isString<T>(value: T) {
+  return typeof value === "string";
 }
 
 export function isString<T>(...validators: Validate<string>[]) {
-  return validateString<T>(true, ...validators);
+  return is(_isString, "must be a string", ...validators);
 }
 
 export function ifString<T>(...validators: Validate<string>[]) {
-  return validateString<T>(false, ...validators);
+  return ifIs(_isString, ...validators);
 }
 
 export function minLength(length: number) {
-  return (value: PropertyValue<string>): ValidationError[] => {
-    if (value.value.length < length) return [{ description: "must be longer" }];
-    return [];
-  };
+  return is<string>((value) => value.length >= length, "must be longer");
 }
 
 export function maxLength(length: number) {
-  return (value: PropertyValue<string>): ValidationError[] => {
-    if (value.value.length > length)
-      return [{ description: "must be shorter" }];
-    return [];
-  };
+  return is<string>((value) => value.length <= length, "must be shorter");
 }

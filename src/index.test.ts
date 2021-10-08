@@ -1,4 +1,4 @@
-import { mergeValidators, validate, Validators } from "../src";
+import { validate, Validators } from "../src";
 const {
   maxLength,
   ifProperty,
@@ -13,6 +13,7 @@ const {
   isArray,
   ifObject,
   ifString,
+  is,
 } = Validators;
 describe("example", () => {
   it("works", () => {
@@ -47,7 +48,13 @@ describe("example", () => {
       ifProperty(
         "metadata",
         ifString(maxLength(100)),
-        ifObject<Person["metadata"]>(hasProperty("text", minLength(10)))
+        ifObject<Person["metadata"]>(
+          hasProperty(
+            "text",
+            minLength(10),
+            is((v) => v == "world", "must be 'world'")
+          )
+        )
       )
     );
 
@@ -74,6 +81,10 @@ describe("example", () => {
       },
       {
         description: "must be longer",
+        path: "metadata.text",
+      },
+      {
+        description: "must be 'world'",
         path: "metadata.text",
       },
     ]);

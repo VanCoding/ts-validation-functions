@@ -1,35 +1,22 @@
+import { ifIs, is } from ".";
 import { mergeValidators, PropertyValue, Validate, ValidationError } from "..";
 
 type ArrayOnly<T> = Extract<T, any[]>;
 
-function validateArray<T, R extends ArrayOnly<T>>(
-  required: boolean,
-  ...validators: Validate<ArrayOnly<T>>[]
-): Validate<T> {
-  const subValidator = mergeValidators(...validators);
-  return (value: PropertyValue<T>): ValidationError[] => {
-    if (!(value.value instanceof Array)) {
-      if (required) {
-        return [{ description: "must be an array" }];
-      } else {
-        return [];
-      }
-    } else {
-      return subValidator(value as PropertyValue<R>);
-    }
-  };
+function _isArray(value: any) {
+  return value instanceof Array;
 }
 
 export function ifArray<T>(
   ...validators: Validate<ArrayOnly<T>>[]
 ): Validate<T> {
-  return validateArray(false, ...validators);
+  return ifIs(_isArray, ...validators);
 }
 
 export function isArray<T>(
   ...validators: Validate<ArrayOnly<T>>[]
 ): Validate<T> {
-  return validateArray(true, ...validators);
+  return is(_isArray, "must be an array", ...validators);
 }
 
 export function each<T>(...validators: Validate<T>[]): Validate<T[]> {

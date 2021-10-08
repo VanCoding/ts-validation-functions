@@ -1,35 +1,21 @@
-import { mergeValidators, PropertyValue, Validate, ValidationError } from "..";
+import { ifIs, is } from ".";
+import { mergeValidators, PropertyValue, Validate } from "..";
 
 type ObjectOnly<T> = Extract<T, object>;
 
-function validateObject<T, R extends ObjectOnly<T>>(
-  required: boolean,
-  ...validators: Validate<ObjectOnly<T>>[]
-) {
-  const subValidator = mergeValidators(...validators);
-  return (value: PropertyValue<T>): ValidationError[] => {
-    if (typeof value.value !== "object") {
-      if (required) {
-        return [{ description: "must be an object" }];
-      } else {
-        return [];
-      }
-    } else {
-      return subValidator(value as PropertyValue<R>);
-    }
-  };
+function _isObject(value: any) {
+  return typeof value === "object";
 }
-
 export function isObject<T>(
   ...validators: Validate<ObjectOnly<T>>[]
 ): Validate<T> {
-  return validateObject(true, ...validators);
+  return is<T, ObjectOnly<T>>(_isObject, "must be an object", ...validators);
 }
 
 export function ifObject<T>(
   ...validators: Validate<ObjectOnly<T>>[]
 ): Validate<T> {
-  return validateObject(false, ...validators);
+  return ifIs<T, ObjectOnly<T>>(_isObject, ...validators);
 }
 
 function validateProperty<T extends object, P extends keyof T>(

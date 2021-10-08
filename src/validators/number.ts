@@ -1,41 +1,22 @@
-import { mergeValidators, PropertyValue, Validate, ValidationError } from "..";
+import { ifIs, is } from ".";
+import { Validate } from "..";
 
-function validateNumber<T>(
-  required: boolean,
-  ...validators: Validate<number>[]
-) {
-  const validator = mergeValidators(...validators);
-  return (value: PropertyValue<T>): ValidationError[] => {
-    if (typeof value.value !== "number") {
-      if (required) {
-        return [{ description: "must be a number" }];
-      } else {
-        return [];
-      }
-    } else {
-      return validator(value as any as PropertyValue<number>);
-    }
-  };
+function _isNumber<T>(value: T) {
+  return typeof value === "number";
 }
 
-export function ifNumber<T>(...validators: Validate<number>[]) {
-  return validateNumber(false, ...validators);
+export function ifNumber(...validators: Validate<number>[]) {
+  return ifIs(_isNumber, ...validators);
 }
 
-export function isNumber<T>(...validators: Validate<number>[]) {
-  return validateNumber(true, ...validators);
+export function isNumber(...validators: Validate<number>[]) {
+  return is(_isNumber, "must be a number", ...validators);
 }
 
 export function min(minValue: number) {
-  return (value: PropertyValue<number>): ValidationError[] => {
-    if (value.value < minValue) return [{ description: "must be greater" }];
-    return [];
-  };
+  return is<number>((value) => value >= minValue, "must be greater");
 }
 
 export function max(maxValue: number) {
-  return (value: PropertyValue<number>): ValidationError[] => {
-    if (value.value > maxValue) return [{ description: "must be lower" }];
-    return [];
-  };
+  return is<number>((value) => value <= maxValue, "must be lower");
 }
